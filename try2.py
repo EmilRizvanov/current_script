@@ -121,7 +121,7 @@ def X_finding(x_parametr, order_parametr, cp_velocity, Temperature, mfp_time, v_
      p = freq_number
  #    print(D)
      Z =0.5*v_F*u*me*(1 / (( k * (2*p+1)*T) / (x) +0.5*( h_ / tau  )  )) # h_ / tau
-     eq = (((v_F*u*me) / 2 )**2)*((((1-x**2)*(1+ Z**2)   ))**(2))*(1 / (Z**2)) - (D**2)*(( 1 / (1 - ( 1 / (tau*v_F*u*me / h_ ) )*(math.atan(Z))    )  )**2)
+     eq = (((v_F*u*me) / 2 )**2)*((((1-x**2)*(1+ Z**2)   ))**(1))*(1 / (Z**2)) - (D**2)*(( 1 / (1 - ( 1 / (tau*v_F*u*me / h_ ) )*(math.atan(Z))    )  )**2)
      return float(eq)
 #print('test',X_finding(1, Delta_zero,u,T,tau,v_F,h_,k,100 #))
 #values = np.linspace(0.01,1,100)
