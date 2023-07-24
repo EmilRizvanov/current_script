@@ -5,6 +5,7 @@ import pandas as pd
 from mpmath import nsum, exp, inf
 from collections import OrderedDict
 from scipy.optimize import fsolve
+from sys import exit
 def validate_interval(f, x0, x1,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8):
     return f(x0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8) * f(x1,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8) < 0
 
@@ -107,9 +108,13 @@ Igl =(16 / (9*(7*Zeta_3)**(0.5))) * (Hi**(0.5))* e * N0* v_F * (math.pi)*k*Tc*((
 #u = 0.1#Igl[996]/ (e*N0)
 print('Critical currents low temperature',Igl[996])
 print('Condesate velocity', Delta_zero /k_F )
+print('Vc / Vf',  (Delta_zero /k_F) / v_F  )
+print('D / (2Ef)',  (Delta_zero ) / E_F  )
+print('another Vc', ((Delta_zero ) / E_F)*v_F )
 #print('condensate velocity',u)
 #print('fermi velocity',v_F)
 #print("velocity", Delta_zero / k_F)
+#sys.exit(0)
 T = 0.9*Tc
 def X_finding(x_parametr, order_parametr, cp_velocity, Temperature, mfp_time, v_fermi, h_plank , k_boltzman,freq_number):
      x = x_parametr
@@ -178,7 +183,7 @@ def Current_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi,
     return float(eq)
 Temperatures = np.linspace(0,Tc,100)
 Current_temperature = np.zeros(len(Temperatures)) # this we need
-condesate_v = np.linspace(0,10*Delta_zero /k_F ,100)
+condesate_v = np.linspace(0,1000 ,100)
 Current_velocity =np.zeros(100)  # This we will maximaze
 Current_data = pd.DataFrame(columns = ['T', 'I'])
 Current_data.to_csv('Current_100mf_2.csv')
