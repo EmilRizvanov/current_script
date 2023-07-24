@@ -90,11 +90,11 @@ T2 =Tc
 T = np.linspace(T1,T2,1000) #
 t = T / Tc
 Delta_zero = 2*k*Tc
-tau =1e+30 # (l / v_F)*1e20
+tau = (l / v_F) # 1e+30
 N0 =N0Q # Density of state on Fermy surface ???????
 #At first let's build Igl(T) which for current  in range of temperatures closed to Tc. We will need this dependece to plot I(T) for arbitary temperatures #
 rho = 1 / (2*tau*(math.pi)*k*Tc / h_ )
-print(v_F)
+print('Fermy velocity',v_F)
 Summ = 0
 for n in range(1000):
     Summ = Summ + ((2*n+1)**(-2))*((2*n + 1 + rho0)**(-1))
@@ -102,12 +102,14 @@ print((8 / (7*Zeta_3))*Summ)
 Hi = (8 / (7*Zeta_3))*nsum(lambda n: ((2*n+1)**(-2))*((2*n + 1 + rho)**(-1)), [0, inf])
 #print(Hi)
 Igl =(16 / (9*(7*Zeta_3)**(0.5))) * (Hi**(0.5))* e * N0* v_F * (math.pi)*k*Tc*((1 - T/Tc)**(3/2)) #(16 / (9*(7*Zeta_3)**(0.5))) * (Hi**(0.5)) * e * N0 * v_F * (math.pi)*k*Tc*((1 -
-plt.plot(T,Igl)
-plt.show()
-u = 0.1#Igl[996]/ (e*N0)
-print('Critical currents LT',Igl[996])
+#plt.plot(T,Igl)
+#plt.show()
+#u = 0.1#Igl[996]/ (e*N0)
+print('Critical currents low temperature',Igl[996])
+print('Condesate velocity', Delta_zero /k_F )
 #print('condensate velocity',u)
 #print('fermi velocity',v_F)
+#print("velocity", Delta_zero / k_F)
 T = 0.9*Tc
 def X_finding(x_parametr, order_parametr, cp_velocity, Temperature, mfp_time, v_fermi, h_plank , k_boltzman,freq_number):
      x = x_parametr
@@ -121,15 +123,15 @@ def X_finding(x_parametr, order_parametr, cp_velocity, Temperature, mfp_time, v_
      p = freq_number
  #    print(D)
      Z =0.5*v_F*u*me*(1 / (( k * (2*p+1)*T) / (x) +0.5*( h_ / tau  )  )) # h_ / tau
-     eq = (((v_F*u*me) / 2 )**2)*((((1-x**2)*(1+ Z**2)   ))**(1))*(1 / (Z**2)) - (D**2)*(( 1 / (1 - ( 1 / (tau*v_F*u*me / h_ ) )*(math.atan(Z))    )  )**2)
+     eq =(((v_F*u*me) / 2 ))*(((1-x**2)*(1 + Z**2))**(0.5))*(1 / (Z)) - (D)*(( 1 / (1 - ( 1 / (tau*v_F*u*me / h_ ) )*(math.atan(Z))    )  )) #(((v_F*u*me) / 2 )**2)*((((1-x**2)*(1+ Z**2)   ))**(1))*(1 / (Z**2)) - (D**2)*(( 1 / (1 - ( 1 / (tau*v_F*u*me / h_ ) )*(math.atan(Z))    )  )**2)
      return float(eq)
 #print('test',X_finding(1, Delta_zero,u,T,tau,v_F,h_,k,100 #))
 #values = np.linspace(0.01,1,100)
 #function =np.array([X_finding(i,Delta_zero,u,T,tau,v_F,h_,k,1) for i in values ])
 #plt.plot(values,function)
 #plt.show()
-Vt = fsolve(X_finding, 0.1, args=(Delta_zero,u,T,tau,v_F,h_,k,1))
-print("test",float(Vt))
+#Vt = fsolve(X_finding, 0.1, args=(Delta_zero,u,T,tau,v_F,h_,k,1))
+#print("test",float(Vt))
 def Delta_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi, h_plank , k_boltzman):
     D = order_parametr
     u = cp_velocity
@@ -176,10 +178,10 @@ def Current_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi,
     return float(eq)
 Temperatures = np.linspace(0,Tc,100)
 Current_temperature = np.zeros(len(Temperatures)) # this we need
-condesate_v = np.linspace(0,100,100)
+condesate_v = np.linspace(0,10*Delta_zero /k_F ,100)
 Current_velocity =np.zeros(100)  # This we will maximaze
 Current_data = pd.DataFrame(columns = ['T', 'I'])
-Current_data.to_csv('Current_100mf.csv')
+Current_data.to_csv('Current_100mf_2.csv')
 for i in range(1,len(Temperatures)):
     for j in range(1,len(condesate_v)):
         Delta = float( fsolve(Delta_finding, Delta_zero, args=(condesate_v[j],Temperatures[i],tau,v_F,h_,k)))
@@ -188,7 +190,7 @@ for i in range(1,len(Temperatures)):
         print('velocity',condesate_v[j])
     Current_temperature[i] = np.amax(Current_velocity)
     I_critical = pd.DataFrame({'T' : [Temperatures[i]], 'I' : [Current_temperature[i]]})
-    I_critical.to_csv('Current_100mf.csv', mode='a', index=False, header=False)
+    I_critical.to_csv('Current_100mf_2.csv', mode='a', index=False, header=False)
     print('Current',Current_temperature[i])
     print('Temperature',Temperatures[i] )
 plt.plot(Temperatures,Current_temperature)
