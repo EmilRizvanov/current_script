@@ -97,6 +97,7 @@ N0 =N0Q # Density of state on Fermy surface ???????
 N_matsubara_freq = int(sys.argv[1])
 Amount_of_points = int(sys.argv[2])
 name_of_csv = str(sys.argv[3])
+
 #At first let's build Igl(T) which for current  in range of temperatures closed to Tc. We will need this dependece to plot I(T) for arbitary temperatures #
 rho = 1 / (2*tau*(math.pi)*k*Tc / h_ )
 Summ = 0
@@ -129,9 +130,11 @@ def X_finding(x_parametr, order_parametr, cp_velocity, Temperature, mfp_time, v_
      h_ = h_plank
      k = k_boltzman
      p = freq_number
- #    print(D)
-     Z =0.5*v_F*u*me*(1 / (( k * (2*p+1)*T) / (x) +0.5*( h_ / tau  )  )) # h_ / tau
-     eq =(((v_F*u*me) / 2 ))*(((1-x**2)*(1 + Z**2))**(0.5))*(1 / (Z)) -  (D)*(1 -   ((me*tau*v_F*u / h_ )**(-1))*math.atan(Z)    )**(-1)  #(((v_F*u*me) / 2 )**2)*((((1-x**2)*(1+ Z**2)   ))**(1))*(1 / (Z**2)) - (D**2)*(( 1 / (1 - ( 1 / (tau*v_F*u*me / h_ ) )*(math.atan(Z))    )  )**2)
+     #We solve dimensionless equation thus cut them
+     u_prime = (me*u*v_F) / (math.pi * k * T)
+     tau_prime = (tau / h_)*math.pi * T
+     Z =u_prime*(1 / ( (2*p+1) / x +0.5*( 1 / tau_prime  )  )) # h_ / tau
+     eq =(((u_prime) / 2 ))*(((1-x**2)*(1 + Z**2))**(0.5))*(1 / (Z)) -  D*(1 -   ((tau_prime*u_prime)**(-1))*math.atan(Z)    )**(-1)  #(((v_F*u*me) / 2 )**2)*((((1-x**2)*(1+ Z**2)   ))**(1))*(1 / (Z**2)) - (D**2)*(( 1 / (1 - ( 1 / (tau*v_F*u*me / h_ ) )*(math.atan(Z))    )  )**2)
      return float(eq)
 #print('test',X_finding(1, Delta_zero,u,T,tau,v_F,h_,k,100 #))
 #u = ((Delta_zero ) / E_F)*v_F
@@ -152,6 +155,9 @@ def Delta_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi, h
     v_F =  v_fermi
     h_ = h_plank
     k = k_boltzman
+    #We solve dimensionless equation thus cut them
+    u_prime = (me*u*v_F) / (math.pi * k * T)
+    tau_prime = (tau / h_)*math.pi * T
     Sum = 0
     for p in range(N_matsubara_freq):
         x = float(bisection(X_finding, [0.001, 1], 1e-30,Delta_zero,u,T,tau,v_F,h_,k,p)) #fsolve(X_finding, 0.1, args=(D,u,T,tau,v_F,h_,k,p)) #   fsolve(X_finding, 0, args=(D,u)
