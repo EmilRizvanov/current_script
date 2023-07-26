@@ -6,6 +6,7 @@ from mpmath import nsum, exp, inf
 from collections import OrderedDict
 from scipy.optimize import fsolve
 from sys import exit
+import sys
 def validate_interval(f, x0, x1,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8):
     return f(x0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8) * f(x1,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8) < 0
 
@@ -84,7 +85,6 @@ G=h_*v_F/l
 N0Q=N0DFT*(1-Q**2)
 DQ=v_F*1/(3*k_F*Q)
 Zeta_3 = 1.202 # constant from article
-# Parametrs. We will solve normilized equation (22-24 in the article).
 # Critical temperatur in [K]
 T1= 1
 T2 =Tc
@@ -93,9 +93,12 @@ t = T / Tc
 Delta_zero = 2*k*Tc
 tau = (l / v_F) # 1e+30
 N0 =N0Q # Density of state on Fermy surface ???????
+#Parametrs for simulations#
+N_matsubara_freq = int(sys.argv[1])
+Amount_of_points = int(sys.argv[2])
+name_of_csv = str(sys.argv[3])
 #At first let's build Igl(T) which for current  in range of temperatures closed to Tc. We will need this dependece to plot I(T) for arbitary temperatures #
 rho = 1 / (2*tau*(math.pi)*k*Tc / h_ )
-print('Fermy velocity',v_F)
 Summ = 0
 for n in range(1000):
     Summ = Summ + ((2*n+1)**(-2))*((2*n + 1 + rho0)**(-1))
@@ -149,7 +152,7 @@ def Delta_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi, h
     h_ = h_plank
     k = k_boltzman
     Sum = 0
-    for p in range(100):
+    for p in range(N_matsubara_freq):
         x = float(bisection(X_finding, [0.001, 1], 1e-20,Delta_zero,u,T,tau,v_F,h_,k,p)) #fsolve(X_finding, 0.1, args=(D,u,T,tau,v_F,h_,k,p)) #   fsolve(X_finding, 0, args=(D,u)
         z =me*0.5*v_F*u*(((2*p+1)*k*T) / x +0.5*(h_ / tau ) )**(-1)           #(1 / (((2*p+1)*k*T) / (x) +0.5*(h_ / tau )  ))
         #y = (D)*(1 -   ((me*tau*v_F*u / h_ )**(-1))*math.atan(z)    )**(-1)         #(( 1 / (1 - ( 1 / (me*tau*v_F*u / h_ ) )*(math.atan(z))    )  )) # ((v_F*u) / 2 )*(((1-x**2)*(1+(1 / (z**2)))   )**(0.5))*(1 / z)i
@@ -177,7 +180,7 @@ def Current_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi,
     h_ = h_plank
     k = k_boltzman
     Sum = 0
-    for p in range(100): #Amount of Macubara freqiencies
+    for p in range(N_matsubara_freq): #Amount of Macubara freqiencies
         x =float(bisection(X_finding, [0.001, 1], 1e-20,Delta_zero,u,T,tau,v_F,h_,k,p)) #   fsolve(X_finding, 0, args=(D,u)
         z =me* 0.5*v_F*u*(1 / (((2*p+1)*k*T) / (x) +0.5*(h_ / tau )  ))
         y = (D)*(( 1 / (1 - ( 1 / (me*tau*v_F*u / h_ ) )*(math.atan(z))    )  )) # ((v_F*u) / 2 )*(((1-x**2)*(1+(1 / (z**2)))   )**(0.5))*(1 / z)i
@@ -194,12 +197,12 @@ current =np.array([Current_finding(Delta,i,0.9*Tc,tau,v_F,h_,k) for i in condesa
 plt.plot(condesate_v,current)
 plt.show()
 #sexit(0)
-Temperatures = np.linspace(0,Tc,10)
+Temperatures = np.linspace(0,Tc,Amount_of_points)
 Current_temperature = np.zeros(len(Temperatures)) # this we need
 condesate_v = np.linspace(1,80000 ,100)
 Current_velocity =np.zeros(100)  # This we will maximaze
 Current_data = pd.DataFrame(columns = ['T', 'I'])
-Current_data.to_csv('Current_100mf_2.csv')
+Current_data.to_csv(name_of_csv+'.csv')
 for i in range(1,len(Temperatures)):
     for j in range(1,len(condesate_v)):
         Delta = float( fsolve(Delta_finding, Delta_zero, args=(condesate_v[j],Temperatures[i],tau,v_F,h_,k)))
@@ -209,7 +212,7 @@ for i in range(1,len(Temperatures)):
         print('velocity',condesate_v[j])
     Current_temperature[i] = np.amax(Current_velocity)
     I_critical = pd.DataFrame({'T' : [Temperatures[i]], 'I' : [Current_temperature[i]]})
-    I_critical.to_csv('Current_100mf_2.csv', mode='a', index=False, header=False)
+    I_critical.to_csv(name_of_csv+'.csv', mode='a', index=False, header=False)
     print('Current',Current_temperature[i])
     print('Temperature',Temperatures[i] )
 plt.plot(Temperatures,Current_temperature)
