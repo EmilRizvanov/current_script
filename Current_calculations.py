@@ -128,15 +128,18 @@ def X_finding(x_parametr, order_parametr, cp_velocity, Temperature, mfp_time, v_
      p = freq_number
  #    print(D)
      Z =0.5*v_F*u*me*(1 / (( k * (2*p+1)*T) / (x) +0.5*( h_ / tau  )  )) # h_ / tau
-     eq =(((v_F*u*me) / 2 ))*(((1-x**2)*(1 + Z**2))**(0.5))*(1 / (Z)) - (D)*(( 1 / (1 - ( 1 / (tau*v_F*u*me / h_ ) )*(math.atan(Z))    )  )) #(((v_F*u*me) / 2 )**2)*((((1-x**2)*(1+ Z**2)   ))**(1))*(1 / (Z**2)) - (D**2)*(( 1 / (1 - ( 1 / (tau*v_F*u*me / h_ ) )*(math.atan(Z))    )  )**2)
+     eq =(((v_F*u*me) / 2 ))*(((1-x**2)*(1 + Z**2))**(0.5))*(1 / (Z)) -  (D)*(1 -   ((me*tau*v_F*u / h_ )**(-1))*math.atan(Z)    )**(-1)  #(((v_F*u*me) / 2 )**2)*((((1-x**2)*(1+ Z**2)   ))**(1))*(1 / (Z**2)) - (D**2)*(( 1 / (1 - ( 1 / (tau*v_F*u*me / h_ ) )*(math.atan(Z))    )  )**2)
      return float(eq)
 #print('test',X_finding(1, Delta_zero,u,T,tau,v_F,h_,k,100 #))
-#values = np.linspace(0.01,1,100)
-#function =np.array([X_finding(i,Delta_zero,u,T,tau,v_F,h_,k,1) for i in values ])
-#plt.plot(values,function)
-#plt.show()
-#Vt = fsolve(X_finding, 0.1, args=(Delta_zero,u,T,tau,v_F,h_,k,1))
-#print("test",float(Vt))
+u = ((Delta_zero ) / E_F)*v_F
+values = np.linspace(0.01,1,100)
+function =np.array([X_finding(i,Delta_zero,u,T,tau,v_F,h_,k,1) for i in values ])
+plt.plot(values,function)
+plt.show()
+Vt = fsolve(X_finding, 0.1, args=(Delta_zero,u,T,tau,v_F,h_,k,1))
+B = bisection(X_finding, [0.001, 1], 1e-20,Delta_zero,u,T,tau,v_F,h_,k,1)
+print(B)
+print("test",float(Vt))
 def Delta_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi, h_plank , k_boltzman):
     D = order_parametr
     u = cp_velocity
@@ -147,9 +150,10 @@ def Delta_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi, h
     k = k_boltzman
     Sum = 0
     for p in range(100):
-        x = fsolve(X_finding, 0.1, args=(D,u,T,tau,v_F,h_,k,p)) #   fsolve(X_finding, 0, args=(D,u)
-        z =me* 0.5*v_F*u*(1 / (((2*p+1)*k*T) / (x) +0.5*(h_ / tau )  ))
-        y = (D)*(( 1 / (1 - ( 1 / (me*tau*v_F*u / h_ ) )*(math.atan(z))    )  )) # ((v_F*u) / 2 )*(((1-x**2)*(1+(1 / (z**2)))   )**(0.5))*(1 / z)i
+        x = float(bisection(X_finding, [0.001, 1], 1e-20,Delta_zero,u,T,tau,v_F,h_,k,p)) #fsolve(X_finding, 0.1, args=(D,u,T,tau,v_F,h_,k,p)) #   fsolve(X_finding, 0, args=(D,u)
+        z =me*0.5*v_F*u*(((2*p+1)*k*T) / x +0.5*(h_ / tau ) )**(-1)           #(1 / (((2*p+1)*k*T) / (x) +0.5*(h_ / tau )  ))
+        #y = (D)*(1 -   ((me*tau*v_F*u / h_ )**(-1))*math.atan(z)    )**(-1)         #(( 1 / (1 - ( 1 / (me*tau*v_F*u / h_ ) )*(math.atan(z))    )  )) # ((v_F*u) / 2 )*(((1-x**2)*(1+(1 / (z**2)))   )**(0.5))*(1 / z)i
+        y = ((v_F*u*me) / 2 )*(((1-x**2)*(1 + z**2))**(0.5))*(1 / (z))
         Sum = Sum + (D / ((2*p+1)*k*T)) - (2*y / (me*u*v_F) )*math.atan(z)
     #    print((D / ((2*p+1)*k*T)))
    #     print((2*y / (u*v_F) )*math.atan(z))i
@@ -157,10 +161,11 @@ def Delta_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi, h
     #print('second term',2*math.pi*k*T*Sum)
     eq = D * math.log(T / Tc) + 2*math.pi*k*T*float(Sum) # D*np.log(T / Tc )
     return float(eq)
-#values = np.linspace(0,Delta_zero,100)
-#function =np.array([Delta_finding(i,u,T,tau,v_F,h_,k,1) for i in values ])
-#plt.plot(values,function)
-#plt.show()
+values = np.linspace(0,Delta_zero,100)
+function =np.array([Delta_finding(i,u,0.1*Tc,tau,v_F,h_,k) for i in values ])
+plt.plot(values,function)
+plt.show()
+#exit(0)
 #Delta =float( fsolve(Delta_finding, Delta_zero, args=(u,T,tau,v_F,h_,k)))
 #print(Delta)
 def Current_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi, h_plank , k_boltzman):
@@ -178,18 +183,27 @@ def Current_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi,
         y = (D)*(( 1 / (1 - ( 1 / (me*tau*v_F*u / h_ ) )*(math.atan(z))    )  )) # ((v_F*u) / 2 )*(((1-x**2)*(1+(1 / (z**2)))   )**(0.5))*(1 / z)i
         Sum = Sum + 2 * ((y / (me*u*v_F) )**2)*(math.atan(z)-(z +  z**(-1))**(-1))
     #    print((D / ((2*p+1)*k*T)))
-   #     print((2*y / (u*v_F) )*math.atan(z))i
+   #     print((2*y / (u*v_F) )*math.atan(z))
     eq = 4*e*N0*v_F*math.pi*T*k*float(Sum) # D*np.log(T / Tc )
     return float(eq)
-Temperatures = np.linspace(0,Tc,100)
+condesate_v = np.linspace(1,100000,1000)
+Delta =float( fsolve(Delta_finding, Delta_zero, args=(u,0.9*Tc,tau,v_F,h_,k)))
+print('Delta',Delta)
+#exit(0)
+current =np.array([Current_finding(Delta,i,0.9*Tc,tau,v_F,h_,k) for i in condesate_v  ])
+plt.plot(condesate_v,current)
+plt.show()
+#sexit(0)
+Temperatures = np.linspace(0,Tc,10)
 Current_temperature = np.zeros(len(Temperatures)) # this we need
-condesate_v = np.linspace(0,1000 ,100)
+condesate_v = np.linspace(1,80000 ,100)
 Current_velocity =np.zeros(100)  # This we will maximaze
 Current_data = pd.DataFrame(columns = ['T', 'I'])
 Current_data.to_csv('Current_100mf_2.csv')
 for i in range(1,len(Temperatures)):
     for j in range(1,len(condesate_v)):
         Delta = float( fsolve(Delta_finding, Delta_zero, args=(condesate_v[j],Temperatures[i],tau,v_F,h_,k)))
+        print('Delta')
         Current_velocity[j] = Current_finding(Delta,condesate_v[j],T,tau,v_F,h_,k)
         print('Current',Current_velocity[j])
         print('velocity',condesate_v[j])
