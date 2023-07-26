@@ -178,7 +178,7 @@ def Current_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi,
     k = k_boltzman
     Sum = 0
     for p in range(100): #Amount of Macubara freqiencies
-        x = fsolve(X_finding, 0.1, args=(D,u,T,tau,v_F,h_,k,p)) #   fsolve(X_finding, 0, args=(D,u)
+        x =float(bisection(X_finding, [0.001, 1], 1e-20,Delta_zero,u,T,tau,v_F,h_,k,p)) #   fsolve(X_finding, 0, args=(D,u)
         z =me* 0.5*v_F*u*(1 / (((2*p+1)*k*T) / (x) +0.5*(h_ / tau )  ))
         y = (D)*(( 1 / (1 - ( 1 / (me*tau*v_F*u / h_ ) )*(math.atan(z))    )  )) # ((v_F*u) / 2 )*(((1-x**2)*(1+(1 / (z**2)))   )**(0.5))*(1 / z)i
         Sum = Sum + 2 * ((y / (me*u*v_F) )**2)*(math.atan(z)-(z +  z**(-1))**(-1))
