@@ -131,22 +131,26 @@ def X_finding(x_parametr, order_parametr, cp_velocity, Temperature, mfp_time, v_
      k = k_boltzman
      p = freq_number
      #We solve dimensionless equation thus cut them
+     D = Delta_zero / (2*math.pi*k*Tc)
      u_prime = (me*u*v_F) / (math.pi * k * T)
-     tau_prime = (tau / h_)*math.pi * T
+     tau_prime = (tau / h_) *math.pi *T*k
      Z =u_prime*(1 / ( (2*p+1) / x +0.5*( 1 / tau_prime  )  )) # h_ / tau
-     eq =(((u_prime) / 2 ))*(((1-x**2)*(1 + Z**2))**(0.5))*(1 / (Z)) -  D*(1 -   ((tau_prime*u_prime)**(-1))*math.atan(Z)    )**(-1)  #(((v_F*u*me) / 2 )**2)*((((1-x**2)*(1+ Z**2)   ))**(1))*(1 / (Z**2)) - (D**2)*(( 1 / (1 - ( 1 / (tau*v_F*u*me / h_ ) )*(math.atan(Z))    )  )**2)
+     y1 = (((u_prime) / 2 ))*(((1-x**2)*(1 + Z**(+2)))**(0.5))*(1 / (Z)) 
+     y2 = D*(1 -   ((tau_prime*u_prime)**(-1))*math.atan(Z)    )**(-1)
+     eq =y2 - y1 #(((v_F*u*me) / 2 )**2)*((((1-x**2)*(1+ Z**2)   ))**(1))*(1 / (Z**2)) - (D**2)*(( 1 / (1 - ( 1 / (tau*v_F*u*me / h_ ) )*(math.atan(Z))    )  )**2)
      return float(eq)
-#print('test',X_finding(1, Delta_zero,u,T,tau,v_F,h_,k,100 #))
-#u = ((Delta_zero ) / E_F)*v_F
-#values = np.linspace(0.01,1,100)
-#function =np.array([X_finding(i,Delta_zero,u,T,tau,v_F,h_,k,1) for i in values ])
-#plt.plot(values,function)
-#plt.show()
+u = ((Delta_zero ) / E_F)*v_F 
+#print('test',X_finding(1, Delta_zero,u,T,tau,v_F,h_,k,1  ))#))
+values = np.linspace(0.01,1,100)
+function =np.array([X_finding(i,Delta_zero,u,0.8*Tc,tau,v_F,h_,k,1) for i in values ])
+plt.plot(values,function)
+plt.show()
 #Vt = fsolve(X_finding, 0.1, args=(Delta_zero,u,T,tau,v_F,h_,k,1))
-#B = bisection(X_finding, [0.001, 1], 1e-20,Delta_zero,u,T,tau,v_F,h_,k,1)
-#print(B)
-#exit(0)
+B = bisection(X_finding, [0.001, 1], 0.01,Delta_zero,u,0.9*Tc,tau,v_F,h_,k,1)
+print(B)
+print('solution',X_finding(B,Delta_zero,u,T,tau,v_F,h_,k,1))
 #print("test",float(Vt))
+#exit(0)
 def Delta_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi, h_plank , k_boltzman):
     D = order_parametr
     u = cp_velocity
@@ -157,28 +161,31 @@ def Delta_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi, h
     k = k_boltzman
     #We solve dimensionless equation thus cut them
     u_prime = (me*u*v_F) / (math.pi * k * T)
-    tau_prime = (tau / h_)*math.pi * T
+    tau_prime = (tau / h_)*math.pi *k *T
     Sum = 0
     for p in range(N_matsubara_freq):
-        x = float(bisection(X_finding, [0.001, 1], 1e-30,Delta_zero,u,T,tau,v_F,h_,k,p)) #fsolve(X_finding, 0.1, args=(D,u,T,tau,v_F,h_,k,p)) #   fsolve(X_finding, 0, args=(D,u)
-        z =me*0.5*v_F*u*(((2*p+1)*k*T) / x +0.5*(h_ / tau ) )**(-1)           #(1 / (((2*p+1)*k*T) / (x) +0.5*(h_ / tau )  ))
-        y = ((v_F*u*me) / 2 )*(((1-x**2)*(1 + z**2))**(0.5))*(1 / (z))        #(( 1 / (1 - ( 1 / (me*tau*v_F*u / h_ ) )*(math.atan(z))    )  )) # ((v_F*u) / 2 )*(((1-x**2)*(1+(1 / (z**2)))   )**(0.5))*(1 / z)i
-        #y = ((v_F*u*me) / 2 )*(((1-x**2)*(1 + z**2))**(0.5))*(1 / (z))
-       # print('diff',(D)*(1 -   ((me*tau*v_F*u / h_ )**(-1))*math.atan(z)    )**(-1) - ((v_F*u*me) / 2 )*(((1-x**2)*(1 + z**2))**(0.5))*(1 / (z)))
-        Sum = Sum + (D / ((2*p+1)*k*T)) - (2*y / (me*u*v_F) )*math.atan(z)
+        x = float(bisection(X_finding, [0.001, 1], 0.01,D,u,T,tau,v_F,h_,k,p)) #fsolve(X_finding, 0.1, args=(D,u,T,tau,v_F,h_,k,p)) #   fsolve(X_finding, 0, args=(D,u)
+        print('solution',X_finding(x,D,u,T,tau,v_F,h_,k,p))
+        z =u_prime*(1 / ( (2*p+1) / x +0.5*( 1 / tau_prime  )  ))        #(1 / (((2*p+1)*k*T) / (x) +0.5*(h_ / tau )  ))
+        y1 = (((u_prime) / 2 ))*(((1-x**2)*(1 + z**2))**(0.5))*(1 / (z))      #(( 1 / (1 - ( 1 / (me*tau*v_F*u / h_ ) )*(math.atan(z))    )  )) # ((v_F*u) / 2 )*(((1-x**2)*(1+(1 / (z**2)))   )**(0.5))*(1 / z)i
+        y2 = D*(1 -   ((tau_prime*u_prime)**(-1))*math.atan(z)    )**(-1)
+        print('diff', y2 - y1)
+        y = y1
+        #print('diff',(((u_prime) / 2 ))*(((1-x**2)*(1 + z**2))**(0.5))*(1 / (z)) -  D*(1 -   ((tau_prime*u_prime)**(-1))*math.atan(z)    )**(-1) )
+        Sum = Sum + (D / ((2*p+1))) - (2*y / (u_prime) )*math.atan(z)
     #    print((D / ((2*p+1)*k*T)))
    #     print((2*y / (u*v_F) )*math.atan(z))i
     #print('first term',D * math.log(T / Tc))
     #print('second term',2*math.pi*k*T*Sum)
-    eq = D * math.log(T / Tc) + 2*math.pi*k*T*float(Sum) # D*np.log(T / Tc )
+    eq = np.exp((-2 / D)*Sum) # 
     return float(eq)
-#values = np.linspace(0,Delta_zero,100)
-#function =np.array([Delta_finding(i,u,0.1*Tc,tau,v_F,h_,k) for i in values ])
-#plt.plot(values,function)
-#plt.show()
-#exit(0)
-#Delta =float( fsolve(Delta_finding, Delta_zero, args=(u,T,tau,v_F,h_,k)))
-#print(Delta)
+values = np.linspace(0.2,Delta_zero / (2*math.pi*k*Tc),100)
+function =np.array([Delta_finding(i,u,0.9*Tc,tau,v_F,h_,k) for i in values ])
+plt.plot(values,function)
+plt.show()
+Delta =float( fsolve(Delta_finding, Delta_zero, args=(u,T,tau,v_F,h_,k)))
+print(Delta)
+exit(0)
 def Current_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi, h_plank , k_boltzman):
     D = order_parametr
     u = cp_velocity
@@ -189,7 +196,7 @@ def Current_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi,
     k = k_boltzman
     Sum = 0
     for p in range(N_matsubara_freq): #Amount of Macubara freqiencies
-        x =float(bisection(X_finding, [0.001, 1], 1e-30,Delta_zero,u,T,tau,v_F,h_,k,p)) #   fsolve(X_finding, 0, args=(D,u)
+        x =float(bisection(X_finding, [0.001, 1], 1e-20,D,u,T,tau,v_F,h_,k,p)) #   fsolve(X_finding, 0, args=(D,u)
         z =me* 0.5*v_F*u*(1 / (((2*p+1)*k*T) / (x) +0.5*(h_ / tau )  ))
         y =  (D)*(( 1 / (1 - ( 1 / (me*tau*v_F*u / h_ ) )*(math.atan(z))    )  )) # ((v_F*u) / 2 )*(((1-x**2)*(1+(1 / (z**2)))   )**(0.5))*(1 / z)i
         print('diff',(D)*(1 -   ((me*tau*v_F*u / h_ )**(-1))*math.atan(z)    )**(-1) - ((v_F*u*me) / 2 )*(((1-x**2)*(1 + z**2))**(0.5))*(1 / (z)))
