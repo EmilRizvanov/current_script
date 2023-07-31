@@ -1,4 +1,4 @@
-Script for critical current.
+**Script for critical current**
 
 to dowload type: git clone https://github.com/EmilRizvanov/current_script.git
 
@@ -11,3 +11,8 @@ To use it type: python Current_calculations.py [Number (Amount of Matsubara Freq
 test.csv was obtained with this command: python3 Current_calculations.py 100 10 test
 
 python plot.py [ name.csv ] make a plot from given csv. (try python3 test.csv)
+
+Red line in the plot in current calculated for formula with works for T close to Tc at T = 0.95Tc.
+
+**!!!**
+This solver very sensitive to paramaetrs. And now work only if we put Pi = 3.14, if we put Pi=3.141 it crashes.

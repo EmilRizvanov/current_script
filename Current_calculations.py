@@ -96,11 +96,13 @@ T_values = np.linspace(0.1*Tc,0.99*Tc,10) #
 Delta_zero = 2*k*Tc
 tau = (l / v_F) # 1e+30
 N0 =N0Q # Density of state on Fermy surface ???????
+Pi = 3.14#15926535897932384626433832795028841971693993751058209749445923 
 #Parametrs for simulations#
 N_matsubara_freq = int(sys.argv[1])
 Amount_of_points = int(sys.argv[2])
 name_of_csv = str(sys.argv[3])
-#At first let's build Igl(T) which for current  in range of temperatures closed to Tc. We will need this dependece to plot I(T) for arbitary temperatures #
+#At first let's build Igl(T) which for current  in range of te
+# mperatures closed to Tc. We will need this dependece to plot I(T) for arbitary temperatures #
 rho = 1 / (2*tau*(math.pi)*k*Tc / h_ )
 Summ = 0
 for n in range(1000):
@@ -136,7 +138,7 @@ def X_finding(x_parametr, order_parametr, cp_velocity, Temperature, mfp_time, v_
      p = freq_number
  #    print(D)
      #print('Matsubata frequency',p)
-     Z =(0.5/ 3.14)*v_F*u*me*(1 / (( k * (2*p+1)*T) / (x) +(0.5 /  3.14)*( h_ / tau  )  )) # h_ / tau
+     Z =(0.5/ Pi )*v_F*u*me*(1 / (( k * (2*p+1)*T) / (x) +(0.5 /  Pi )*( h_ / tau  )  )) # h_ / tau
      eq = (((v_F*u*me) / 2 ) / D )*(((1-x**2)*(1 + Z**2))**(0.5))*(1 / (Z)) -(1 -   ((me*tau*v_F*u / h_ )**(-1))*math.atan(Z)    )**(-1)  #(((v_F*u*me) / 2 )**2)*((((1-x**2)*(1+ Z**2)   ))**(1))*(1 / (Z**2)) - (D**2)*(( 1 / (1 - ( 1 / (tau*v_F*u*me / h_ ) )*(math.atan(Z))    )  )**2)
      return float(eq)
 #print('test',X_finding(1, Delta_zero,u,T,tau,v_F,h_,k,100 #))
@@ -162,13 +164,13 @@ def Delta_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi, h
     Sum = 0
     for p in range(N_matsubara_freq):
         x = float(bisection(X_finding, [1e-10, 1], 1e-2,D,u,T,tau,v_F,h_,k,p)) #fsolve(X_finding, 0.1, args=(D,u,T,tau,v_F,h_,k,p)) #   fsolve(X_finding, 0, args=(D,u)
-        z =me*(0.5 /  3.14)*v_F*u*(((2*p+1)*k*T) / x +(0.5 /  3.14)*(h_ / tau ) )**(-1)           #(1 / (((2*p+1)*k*T) / (x) +0.5*(h_ / tau )  ))
+        z =me*(0.5 /  Pi )*v_F*u*(((2*p+1)*k*T) / x +(0.5 /  Pi )*(h_ / tau ) )**(-1)           #(1 / (((2*p+1)*k*T) / (x) +0.5*(h_ / tau )  ))
         # To avoid incuraccy we do following. We don't write constant here because it will be cutted of in expresion with sum
         y = 1*(((1-x**2)*(1 + z**2))**(0.5))*(1 / (z)) 
-        Sum = Sum + (D / ((2*p+1)*k*T*3.14)) - (y)*math.atan(z)  
+        Sum = Sum + (D / ((2*p+1)*k*T*Pi)) - (y)*math.atan(z)  
         #print(Sum)
         print(Sum) 
-    eq = math.log(T / Tc) +( 2* 3.14*k*T /D )*float(Sum) # D*np.log(T / Tc )
+    eq = math.log(T / Tc) +( 2* Pi *k*T /D )*float(Sum) # D*np.log(T / Tc )
     return float(eq)
 values = np.linspace(0,Delta_zero,100)
 function =np.array([Delta_finding(i,u,0.5*Tc,tau,v_F,h_,k) for i in values ])
@@ -189,7 +191,7 @@ def Current_finding(order_parametr, cp_velocity, Temperature, mfp_time, v_fermi,
     Sum = 0
     for p in range(N_matsubara_freq): #Amount of Macubara freqiencies
         x =float(bisection(X_finding, [1e-10, 1], 1e-1,D,u,T,tau,v_F,h_,k,p)) #   fsolve(X_finding, 0, args=(D,u)
-        z =me* 0.5*v_F*u*(1 / (((2*p+1)*k*T*3.14) / (x) +0.5*(h_ / tau )  ))
+        z =me* 0.5*v_F*u*(1 / (((2*p+1)*k*T*Pi) / (x) +0.5*(h_ / tau )  ))
         y = (0.5)*(((1-x**2)*(1 + z**2))**(0.5))*(1 / (z))  # ((v_F*u) / 2 )*(((1-x**2)*(1+(1 / (z**2)))   )**(0.5))*(1 / z)i
         Sum = Sum + 2 * ((y / 1)**2)*(math.atan(z)-(z +  z**(-1))**(-1))
     #    print((D / ((2*p+1)*k*T)))
